@@ -1,0 +1,20 @@
+# IDE (JetBrains)
+.idea/
+
+# OS-generated files
+.DS_Store
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+
+# Python tooling caches
+.mypy_cache/
+.pytest_cache/
+
+# Python packaging artifacts
+build/
+*.egg-info/
