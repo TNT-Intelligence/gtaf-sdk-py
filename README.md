@@ -110,6 +110,26 @@ For optional telemetry, `enforce_from_files` accepts `TelemetryHooks` from `gtaf
 Hooks are observational only and do not alter enforcement decisions.
 A minimal end-to-end integration example is available at `examples/agent_runtime_integration.py`.
 
+## Quickstart (Minimal Enforcement Wiring)
+```python
+from gtaf_sdk.actions import normalize_action
+from gtaf_sdk.enforcement import enforce_from_files
+from gtaf_sdk.models import RuntimeContext
+
+action = normalize_action(tool_name="Git", arguments={"command": "status"}, mapping={"git": "git"})
+context = RuntimeContext(
+    scope="ops.prod", component="ops.agent", interface="ops-api", action=action
+).to_dict()
+result = enforce_from_files(
+    drc_path="path/to/drc.json", artifacts_dir="path/to/artifacts", context=context
+)
+if result.outcome == "DENY":
+    print(result.reason_code, result.refs)
+else:
+    print("execute tool here")
+```
+The SDK does not implement enforcement semantics; it only wires inputs to the deterministic runtime core.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
