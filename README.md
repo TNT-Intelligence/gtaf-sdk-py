@@ -34,6 +34,22 @@ result = enforce(drc, context, artifacts)
 `load_runtime_inputs` resolves artifacts strictly via `drc["refs"]`, with no implicit discovery or heuristics.
 It does not modify runtime enforcement semantics and raises explicit SDK exceptions on failure.
 
+The SDK also provides `enforce_from_files` in `gtaf_sdk.enforcement` for direct filesystem-based enforcement wiring.
+
+```python
+from gtaf_sdk.enforcement import enforce_from_files
+
+result = enforce_from_files(
+    drc_path="path/to/drc.json",
+    artifacts_dir="path/to/artifacts",
+    context=context,
+)
+```
+
+`enforce_from_files` delegates to `load_runtime_inputs(...)` and then calls `gtaf_runtime.enforce(...)`.
+On loader or I/O failures, it returns an `EnforcementResult` with `outcome="DENY"` and a `reason_code` prefixed with `SDK_`.
+Runtime semantics remain unchanged.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
