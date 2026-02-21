@@ -50,6 +50,24 @@ result = enforce_from_files(
 On loader or I/O failures, it returns an `EnforcementResult` with `outcome="DENY"` and a `reason_code` prefixed with `SDK_`.
 Runtime semantics remain unchanged.
 
+For startup checks, the SDK provides structural validation helpers in `gtaf_sdk.validation`.
+
+```python
+from gtaf_sdk.validation import warmup_from_files
+
+result = warmup_from_files(
+    drc_path="path/to/drc.json",
+    artifacts_dir="path/to/artifacts",
+)
+
+if not result.ok:
+    print(result.errors)
+    exit(1)
+```
+
+This performs structural startup validation only.
+It does not execute enforcement and does not modify runtime semantics.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
