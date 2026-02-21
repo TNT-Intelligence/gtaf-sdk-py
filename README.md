@@ -86,6 +86,26 @@ action_id = normalize_action(
 This performs syntactic normalization only.
 It does not perform policy evaluation and does not modify enforcement semantics.
 
+For typed runtime input ergonomics, the SDK provides `ActionId` and `RuntimeContext` in `gtaf_sdk.models`.
+
+```python
+from gtaf_sdk.models import ActionId, RuntimeContext
+
+action = ActionId(value="git.commit")
+action_id = action.to_str()
+
+context = RuntimeContext(
+    scope="ops.prod",
+    component="ops.agent",
+    interface="ops-api",
+    action=action_id,
+    extras={"system": "rachel-ai"},
+)
+payload = context.to_dict()
+```
+
+These models are opt-in ergonomics only and do not change enforcement semantics.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
