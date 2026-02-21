@@ -13,8 +13,26 @@ Current package version: **0.1.0-alpha.1**.
 ## Scope
 This repository currently contains:
 - package baseline and versioning surface
+- deterministic runtime input loader API under `gtaf_sdk.artifacts`
 - minimal test harness and import validation
 - documentation and metadata scaffolding
+
+## Current API Surface
+The SDK currently provides a deterministic artifact loader via `load_runtime_inputs` in `gtaf_sdk.artifacts`.
+
+```python
+from gtaf_sdk.artifacts import load_runtime_inputs
+from gtaf_runtime import enforce
+
+drc, artifacts = load_runtime_inputs(
+    drc_path="path/to/drc.json",
+    artifacts_dir="path/to/artifacts",
+)
+result = enforce(drc, context, artifacts)
+```
+
+`load_runtime_inputs` resolves artifacts strictly via `drc["refs"]`, with no implicit discovery or heuristics.
+It does not modify runtime enforcement semantics and raises explicit SDK exceptions on failure.
 
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
