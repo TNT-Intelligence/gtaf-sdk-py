@@ -8,7 +8,7 @@ Provide ergonomic helpers and standardized integration patterns on top of the GT
 
 ## Status
 This repository is in an early stage and the public API surface is not yet stable.
-Current package version: **0.1.0-alpha.6**.
+Current package version: **0.1.0-alpha.7**.
 
 ## Scope
 This repository currently contains:
