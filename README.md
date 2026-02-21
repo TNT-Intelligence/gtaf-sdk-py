@@ -68,6 +68,24 @@ if not result.ok:
 This performs structural startup validation only.
 It does not execute enforcement and does not modify runtime semantics.
 
+For deterministic action ID shaping, the SDK provides `normalize_action` in `gtaf_sdk.actions`.
+
+```python
+from gtaf_sdk.actions import normalize_action
+
+mapping = {"git": "git"}
+
+action_id = normalize_action(
+    tool_name="Git",
+    arguments={"command": "commit -m 'msg'"},
+    mapping=mapping,
+)
+# -> "git.commit"
+```
+
+This performs syntactic normalization only.
+It does not perform policy evaluation and does not modify enforcement semantics.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core

@@ -20,3 +20,7 @@ class InvalidArtifactError(GTAFSDKError):
 
 class DuplicateArtifactIDError(GTAFSDKError):
     """Raised when the same artifact id is referenced across categories."""
+
+
+class ActionNormalizationError(GTAFSDKError):
+    """Raised when action normalization is configured to fail on unknown input."""
