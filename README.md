@@ -106,6 +106,10 @@ payload = context.to_dict()
 
 These models are opt-in ergonomics only and do not change enforcement semantics.
 
+For optional telemetry, `enforce_from_files` accepts `TelemetryHooks` from `gtaf_sdk.telemetry`.
+Hooks are observational only and do not alter enforcement decisions.
+A minimal end-to-end integration example is available at `examples/agent_runtime_integration.py`.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
