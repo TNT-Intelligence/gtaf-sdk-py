@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gtaf-sdk-py"
-version = "0.1.0-alpha.3"
+version = "0.1.0-alpha.4"
 description = "Optional integration layer for gtaf-runtime-py"
 readme = "README.md"
 license = { file = "LICENSE" }
