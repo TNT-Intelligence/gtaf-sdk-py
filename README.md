@@ -67,6 +67,7 @@ if not result.ok:
 
 This performs structural startup validation only.
 It does not execute enforcement and does not modify runtime semantics.
+Its structural DRC validation surface is derived from the runtime contract.
 
 For deterministic action ID shaping, the SDK provides `normalize_action` in `gtaf_sdk.actions`.
 

@@ -6,8 +6,6 @@ from typing import Any
 
 from .artifacts import load_runtime_inputs
 
-SUPPORTED_GTAF_VERSIONS = {"0.1"}
-
 SDK_VALIDATION_INVALID_DRC_STRUCTURE = "SDK_VALIDATION_INVALID_DRC_STRUCTURE"
 SDK_VALIDATION_UNSUPPORTED_VERSION = "SDK_VALIDATION_UNSUPPORTED_VERSION"
 SDK_VALIDATION_MISSING_REFERENCE = "SDK_VALIDATION_MISSING_REFERENCE"
@@ -46,7 +44,7 @@ def validate_artifacts(drc: dict, artifacts: dict[str, dict]) -> ValidationResul
     errors: list[ValidationIssue] = []
     refs = {"sb": [], "dr": [], "rb": []}
 
-    # 1) DRC structure checks.
+    # 1) DRC structure checks (runtime-derived authority).
     if not isinstance(drc, dict):
         _add_error(
             errors,
@@ -60,46 +58,31 @@ def validate_artifacts(drc: dict, artifacts: dict[str, dict]) -> ValidationResul
     else:
         drc_obj = drc
 
-    for field in ("id", "revision", "result", "gtaf_ref", "refs"):
-        if field not in drc_obj:
-            _add_error(
-                errors,
-                code=SDK_VALIDATION_INVALID_DRC_STRUCTURE,
-                message=f"missing required field: {field}",
-                field_path=f"drc.{field}",
-                artifact_id=None,
-                artifact_type="drc",
-            )
+    try:
+        runtime_schema_ok = _runtime_validate_drc_schema(drc_obj)
+        supported_versions = _runtime_supported_versions()
+    except Exception as exc:
+        _add_error(
+            errors,
+            code=SDK_VALIDATION_LOAD_ERROR,
+            message="runtime contract unavailable",
+            field_path="drc",
+            artifact_id=None,
+            artifact_type="drc",
+        )
+        return ValidationResult(
+            ok=False,
+            errors=errors,
+            warnings=[],
+            meta={"error": str(exc)},
+        )
 
-    gtaf_ref = drc_obj.get("gtaf_ref")
-    version: str | None = None
-    if isinstance(gtaf_ref, dict):
-        if "version" not in gtaf_ref:
-            _add_error(
-                errors,
-                code=SDK_VALIDATION_INVALID_DRC_STRUCTURE,
-                message="missing required field: gtaf_ref.version",
-                field_path="drc.gtaf_ref.version",
-                artifact_id=None,
-                artifact_type="drc",
-            )
-        elif isinstance(gtaf_ref.get("version"), str) and gtaf_ref["version"]:
-            version = gtaf_ref["version"]
-        else:
-            _add_error(
-                errors,
-                code=SDK_VALIDATION_INVALID_DRC_STRUCTURE,
-                message="gtaf_ref.version must be a non-empty string",
-                field_path="drc.gtaf_ref.version",
-                artifact_id=None,
-                artifact_type="drc",
-            )
-    else:
+    if not runtime_schema_ok:
         _add_error(
             errors,
             code=SDK_VALIDATION_INVALID_DRC_STRUCTURE,
-            message="gtaf_ref must be an object",
-            field_path="drc.gtaf_ref",
+            message="drc fails runtime structural contract",
+            field_path="drc",
             artifact_id=None,
             artifact_type="drc",
         )
@@ -127,21 +110,18 @@ def validate_artifacts(drc: dict, artifacts: dict[str, dict]) -> ValidationResul
                         field_path=f"drc.refs.{category}[{idx}]",
                         artifact_id=None,
                         artifact_type="drc",
-                    )
+                )
                     continue
                 refs[category].append(item)
-    else:
-        _add_error(
-            errors,
-            code=SDK_VALIDATION_INVALID_DRC_STRUCTURE,
-            message="refs must be an object",
-            field_path="drc.refs",
-            artifact_id=None,
-            artifact_type="drc",
-        )
 
     # 2) Version check.
-    if version is not None and version not in SUPPORTED_GTAF_VERSIONS:
+    version: str | None = None
+    gtaf_ref = drc_obj.get("gtaf_ref")
+    if isinstance(gtaf_ref, dict):
+        version_value = gtaf_ref.get("version")
+        if isinstance(version_value, str) and version_value:
+            version = version_value
+    if version is not None and version not in supported_versions:
         _add_error(
             errors,
             code=SDK_VALIDATION_UNSUPPORTED_VERSION,
@@ -389,3 +369,15 @@ def _add_error(
             artifact_type=artifact_type,
         )
     )
+
+
+def _runtime_validate_drc_schema(drc: dict[str, Any]) -> bool:
+    from gtaf_runtime.enforce import _validate_drc_schema
+
+    return bool(_validate_drc_schema(drc))
+
+
+def _runtime_supported_versions() -> set[str]:
+    from gtaf_runtime.enforce import PROJECTION_CONTRACT_VERSION
+
+    return {str(PROJECTION_CONTRACT_VERSION)}
