@@ -372,12 +372,12 @@ def _add_error(
 
 
 def _runtime_validate_drc_schema(drc: dict[str, Any]) -> bool:
-    from gtaf_runtime.enforce import _validate_drc_schema
+    from gtaf_runtime import validate_drc_structure
 
-    return bool(_validate_drc_schema(drc))
+    return bool(validate_drc_structure(drc))
 
 
 def _runtime_supported_versions() -> set[str]:
-    from gtaf_runtime.enforce import PROJECTION_CONTRACT_VERSION
+    from gtaf_runtime import get_supported_projection_versions
 
-    return {str(PROJECTION_CONTRACT_VERSION)}
+    return {str(version) for version in get_supported_projection_versions()}
