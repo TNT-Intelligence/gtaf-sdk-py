@@ -1,5 +1,6 @@
 # IDE (JetBrains)
 .idea/
+.vscode/
 
 # OS-generated files
 .DS_Store
@@ -10,6 +11,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.release-venv/
 
 # Python tooling caches
 .mypy_cache/
@@ -17,4 +19,5 @@ __pycache__/
 
 # Python packaging artifacts
 build/
+dist/
 *.egg-info/

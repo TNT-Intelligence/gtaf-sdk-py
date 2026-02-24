@@ -1,14 +1,29 @@
 # GTAF SDK (Python)
-Optional integration layer for `gtaf-runtime-py`.
+Optional integration layer for `gtaf-runtime`.
 
 This repository is `gtaf-sdk-py`.
 
 ## Purpose
 Provide ergonomic helpers and standardized integration patterns on top of the GTAF runtime core.
 
+gtaf-sdk is an optional integration helper layer built on top of gtaf-runtime.
+It provides developer ergonomics and convenience utilities, but does not define normative governance rules.
+The authoritative enforcement core of GTAF remains gtaf-runtime.
+
 ## Status
-This repository is in an early stage and the public API surface is not yet stable.
-Current package version: **0.1.0-alpha.7**.
+This repository is in an early stage and the public API surface is still evolving.
+Current package version: **0.1.0**.
+
+## Installation
+Install from PyPI:
+
+```sh
+pip install gtaf-sdk
+```
+
+Runtime requirement:
+
+- `gtaf-runtime>=0.1.0,<0.2.0`
 
 ## Scope
 This repository currently contains:
@@ -133,7 +148,7 @@ The SDK does not implement enforcement semantics; it only wires inputs to the de
 
 ## SDK Compatibility Declaration
 ### Runtime Compatibility Matrix
-The SDK is validated against `gtaf-runtime-py` version line:
+The SDK is validated against `gtaf-runtime` version line:
 
 - `0.1.x`
 
@@ -158,7 +173,7 @@ The SDK MAY:
 - Provide telemetry hooks.
 - Provide convenience wrappers.
 
-Runtime enforcement semantics remain exclusively defined by `gtaf-runtime-py`.
+Runtime enforcement semantics remain exclusively defined by `gtaf-runtime`.
 
 ### Breaking Change Definition (SDK Layer)
 The following constitute breaking changes at the SDK layer:
@@ -210,12 +225,12 @@ SDK version numbers do not redefine Projection versions.
 - an alternative runtime implementation
 
 ## Versioning
-This repository follows semantic versioning with pre-releases while the API is still evolving (for example `0.1.0-alpha.N`).
+This repository follows semantic versioning.
 
 Practical project rules:
-- bump the pre-release number for each externally visible SDK API change
+- bump the appropriate semantic version component for each externally visible SDK API change
 - keep version values in sync across `pyproject.toml`, `gtaf_sdk/version.py`, and the README status line
-- create stable versions only when the API surface is intentionally declared stable
+- treat runtime-semantic drift as a breaking change
 
 ## Local Development
 Run tests:
