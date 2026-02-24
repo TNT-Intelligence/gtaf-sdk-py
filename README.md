@@ -131,6 +131,77 @@ else:
 ```
 The SDK does not implement enforcement semantics; it only wires inputs to the deterministic runtime core.
 
+## SDK Compatibility Declaration
+### Runtime Compatibility Matrix
+The SDK is validated against `gtaf-runtime-py` version line:
+
+- `0.1.x`
+
+Minimum required runtime version: `0.1.0`.
+
+If an incompatible runtime version is detected, SDK validation MUST fail deterministically and MUST NOT introduce fallback allow behavior.
+
+### Semantic Non-Interference Guarantee
+The SDK MUST NOT:
+
+- Modify runtime enforcement decisions.
+- Remap runtime reason codes.
+- Introduce fallback allow behavior.
+- Change EXECUTE/DENY semantics.
+- Reorder enforcement logic.
+
+The SDK MAY:
+
+- Provide normalization utilities.
+- Provide structural validation helpers.
+- Provide typed models.
+- Provide telemetry hooks.
+- Provide convenience wrappers.
+
+Runtime enforcement semantics remain exclusively defined by `gtaf-runtime-py`.
+
+### Breaking Change Definition (SDK Layer)
+The following constitute breaking changes at the SDK layer:
+
+- Changes that alter observable enforcement outcomes.
+- Changes that alter normalization behavior in a way that breaks existing mappings.
+- Removal or semantic change of public SDK APIs.
+- Changes that alter expected SDK failure behavior (for example, `SDK_*` error codes).
+
+Breaking changes require a MAJOR version increment.
+
+Minor releases MUST NOT introduce runtime-semantic drift.
+
+### Public SDK Contract Surface
+The following are considered stable public SDK APIs:
+
+- `enforce_from_files(...)`
+- `warmup_from_files(...)`
+- `normalize_action(...)`
+- `RuntimeContext`
+- `ActionId`
+- `TelemetryHooks`
+
+The following are NOT part of the stable contract surface:
+
+- Internal module structure.
+- Private helper functions.
+- Non-exported utilities.
+
+### Projection Alignment Guarantee
+The SDK is projection-aligned, not projection-defining.
+
+Projection semantics are defined exclusively by the runtime contract.
+
+If a Projection MAJOR version changes, the SDK must explicitly declare support before use.
+
+### Versioning Policy
+SDK versioning is independent from runtime version numbers.
+
+SDK versions may evolve ergonomics without changing enforcement semantics.
+
+SDK version numbers do not redefine Projection versions.
+
 ## Non-Goals
 `gtaf-sdk-py` is **not**:
 - a replacement for the runtime enforcement core
