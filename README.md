@@ -1,4 +1,15 @@
 # GTAF SDK (Python)
+[![PyPI version](https://img.shields.io/pypi/v/gtaf-sdk.svg)](https://pypi.org/project/gtaf-sdk/)
+[![Python](https://img.shields.io/pypi/pyversions/gtaf-sdk.svg)](https://pypi.org/project/gtaf-sdk/)
+[![License](https://img.shields.io/pypi/l/gtaf-sdk.svg)](LICENSE)
+
+gtaf-sdk is a thin integration helper layer for gtaf-runtime.
+
+It provides ergonomic utilities for wiring deterministic runtime inputs,
+without altering enforcement semantics.
+
+Normative governance and projection semantics are defined exclusively by gtaf-runtime.
+
 Optional integration layer for `gtaf-runtime`.
 
 This repository is `gtaf-sdk-py`.
@@ -11,7 +22,10 @@ It provides developer ergonomics and convenience utilities, but does not define 
 The authoritative enforcement core of GTAF remains gtaf-runtime.
 
 ## Status
-This repository is in an early stage and the public API surface is still evolving.
+This repository is in its initial public release phase (v0.1.0).
+
+The public API surface is intentionally minimal and may evolve in minor versions,
+while maintaining the Semantic Non-Interference Guarantee.
 Current package version: **0.1.0**.
 
 ## Installation
@@ -24,6 +38,7 @@ pip install gtaf-sdk
 Runtime requirement:
 
 - `gtaf-runtime>=0.1.0,<0.2.0`
+  [https://pypi.org/project/gtaf-runtime/](https://pypi.org/project/gtaf-runtime/)
 
 ## Scope
 This repository currently contains:
