@@ -27,7 +27,7 @@ jobs:
       - name: Install package (editable)
         run: |
           python -m pip install --upgrade pip
-          python -m pip install gtaf-runtime==0.1.1
+          python -m pip install "gtaf-runtime>=0.1.0,<0.2.0"
           python -m pip install -e .
 
       - name: Validate runtime dependency constraint
