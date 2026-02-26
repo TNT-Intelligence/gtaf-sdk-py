@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gtaf-sdk"
-version = "0.1.0"
+version = "0.1.1"
 description = "Optional integration layer for gtaf-runtime"
 readme = "README.md"
 license = "MIT"
@@ -13,6 +13,12 @@ requires-python = ">=3.10"
 
 authors = [
   { name = "TNT Intelligence", email = "contact@tnt-intelligence.com" }
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
 ]
 
 dependencies = [

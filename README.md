@@ -22,11 +22,11 @@ It provides developer ergonomics and convenience utilities, but does not define 
 The authoritative enforcement core of GTAF remains gtaf-runtime.
 
 ## Status
-This repository is in its initial public release phase (v0.1.0).
+This repository is in its initial public release phase (v0.1.1).
 
 The public API surface is intentionally minimal and may evolve in minor versions,
 while maintaining the Semantic Non-Interference Guarantee.
-Current package version: **0.1.0**.
+Current package version: **0.1.1**.
 
 ## Installation
 Install from PyPI:
