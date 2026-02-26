@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package (editable)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tomli
+          python -m pip install "gtaf-runtime>=0.1.0,<0.2.0"
+          python -m pip install -e .
+
+      - name: Validate runtime dependency constraint
+        run: |
+          python - <<'PY'
+          try:
+              import tomllib
+          except ModuleNotFoundError:  # Python < 3.11
+              import tomli as tomllib
+
+          with open("pyproject.toml", "rb") as f:
+              data = tomllib.load(f)
+          deps = data["project"]["dependencies"]
+          expected = "gtaf-runtime>=0.1.0,<0.2.0"
+          assert expected in deps, f"Missing dependency constraint: {expected}"
+          PY
+
+      - name: Validate required runtime public API symbols
+        run: |
+          python - <<'PY'
+          import gtaf_runtime
+          from gtaf_runtime.types import EnforcementResult
+
+          assert hasattr(gtaf_runtime, "enforce")
+          assert hasattr(gtaf_runtime, "validate_drc_structure")
+          assert hasattr(gtaf_runtime, "get_supported_projection_versions")
+          assert EnforcementResult is not None
+          PY
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+  packaging-smoke:
+    name: Packaging Smoke Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install packaging tools
+        run: python -m pip install --upgrade pip build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Validate distribution metadata
+        run: python -m twine check dist/*
+
+      - name: Wheel artifact hygiene (no tests in wheel)
+        run: |
+          unzip -l dist/*.whl | tee wheel-contents.txt
+          ! grep -E '/tests/' wheel-contents.txt
+
+      - name: Create clean venv and install wheel
+        run: |
+          python -m venv venv_test
+          source venv_test/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install dist/*.whl
+
+      - name: Import smoke test
+        run: |
+          source venv_test/bin/activate
+          python -c "import gtaf_sdk"
+          python -c "from gtaf_sdk.enforcement import enforce_from_files"
+
+      - name: Wheel behavior smoke test
+        run: |
+          source venv_test/bin/activate
+          python - <<'PY'
+          import json
+          import tempfile
+          from pathlib import Path
+
+          from gtaf_sdk.enforcement import enforce_from_files
+
+          with tempfile.TemporaryDirectory() as tmp:
+              base = Path(tmp)
+              drc_path = base / "drc.json"
+              artifacts_dir = base / "artifacts"
+              (artifacts_dir / "sb").mkdir(parents=True)
+              (artifacts_dir / "dr").mkdir(parents=True)
+              (artifacts_dir / "rb").mkdir(parents=True)
+
+              drc = {
+                  "id": "DRC-SDK-SMOKE-001",
+                  "revision": 1,
+                  "result": "PERMITTED",
+                  "gtaf_ref": {"version": "0.1"},
+                  "scope": "smoke.prod",
+                  "valid_from": "2026-01-01T00:00:00Z",
+                  "valid_until": "2026-12-31T00:00:00Z",
+                  "refs": {
+                      "sb": ["SB-SMOKE-001"],
+                      "dr": ["DR-SMOKE-001"],
+                      "rb": ["RB-SMOKE-001"],
+                  },
+              }
+              sb = {
+                  "id": "SB-SMOKE-001",
+                  "scope": "smoke.prod",
+                  "included_components": ["smoke.agent"],
+                  "excluded_components": [],
+                  "allowed_interfaces": ["smoke-api"],
+                  "valid_from": "2026-01-01T00:00:00Z",
+                  "valid_until": "2026-12-31T00:00:00Z",
+              }
+              dr = {
+                  "id": "DR-SMOKE-001",
+                  "scope": "smoke.prod",
+                  "decisions": ["run_smoke"],
+                  "delegation_mode": "AUTONOMOUS",
+                  "valid_from": "2026-01-01T00:00:00Z",
+                  "valid_until": "2026-12-31T00:00:00Z",
+              }
+              rb = {
+                  "id": "RB-SMOKE-001",
+                  "scope": "smoke.prod",
+                  "active": True,
+                  "valid_from": "2026-01-01T00:00:00Z",
+                  "valid_until": "2026-12-31T00:00:00Z",
+              }
+              context = {
+                  "scope": "smoke.prod",
+                  "component": "smoke.agent",
+                  "interface": "smoke-api",
+                  "action": "run_smoke",
+              }
+
+              drc_path.write_text(json.dumps(drc), encoding="utf-8")
+              (artifacts_dir / "sb" / "SB-SMOKE-001.json").write_text(json.dumps(sb), encoding="utf-8")
+              (artifacts_dir / "dr" / "DR-SMOKE-001.json").write_text(json.dumps(dr), encoding="utf-8")
+              (artifacts_dir / "rb" / "RB-SMOKE-001.json").write_text(json.dumps(rb), encoding="utf-8")
+
+              result = enforce_from_files(
+                  drc_path=str(drc_path),
+                  artifacts_dir=str(artifacts_dir),
+                  context=context,
+              )
+              assert result.outcome == "EXECUTE", result
+              assert result.reason_code == "OK", result
+          PY
